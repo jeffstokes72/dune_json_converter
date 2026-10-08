@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Solido and base backup converter — Dune: Awakening</title>
+  <meta name="description" content="Convert a Dune: Awakening solido image JSON into a base backup JSON, and a base backup back into a solido image.">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@420;560;680&family=Source+Serif+4:opsz,wght@8..60,460;8..60,640&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="mast">
+    <p class="eyebrow">Dune: Awakening</p>
+    <h1>Solido image <span aria-hidden="true">↔</span> base backup</h1>
+    <p class="lede">Turn a solido blueprint into a base reconstruction file, or pull the layout back out of a base backup. Both files describe the same base. The solido is the shape. The backup is the base, with its chests and claim.</p>
+  </header>
+
+  <main>
+    <section class="workspace" aria-label="Converter">
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Source file</h2>
+          <button type="button" class="text-button" id="try-sample">Try a small example</button>
+        </div>
+        <label class="drop" id="drop">
+          <input id="file" type="file" accept="application/json,.json">
+          <span class="drop-kicker">JSON</span>
+          <span class="drop-title">Drop a solido image or a base backup</span>
+          <span class="drop-hint">or choose a file. Nothing is uploaded.</span>
+        </label>
+        <p class="file-name" id="file-name" hidden></p>
+        <div class="options" id="solido-options" hidden>
+          <label class="claim">
+            <span>Claim console written into the backup</span>
+            <select id="claim">
+              <option value="auto">Use the file’s base type</option>
+              <option value="advanced">Advanced Sub-Fief</option>
+              <option value="small">Sub-Fief</option>
+            </select>
+          </label>
+          <label class="check">
+            <input id="fill-water" type="checkbox">
+            <span>
+              <strong>Fill water cisterns</strong>
+              <small>Small cisterns get 5,000, medium 25,000, and large 100,000. Windtraps and purifiers stay as they are.</small>
+            </span>
+          </label>
+        </div>
+        <p class="status" id="status" role="status"></p>
+      </div>
+
+      <div class="panel panel-result">
+        <div class="panel-head">
+          <h2>Conversion</h2>
+          <p class="direction" id="direction">Waiting for a file</p>
+        </div>
+        <dl class="stats" id="stats" hidden>
+          <div><dt>Name</dt><dd id="stat-name">—</dd></div>
+          <div><dt>Map</dt><dd id="stat-map">—</dd></div>
+          <div><dt>Owner</dt><dd id="stat-owner">—</dd></div>
+          <div><dt>Console</dt><dd id="stat-type">—</dd></div>
+          <div><dt>Pieces</dt><dd id="stat-pieces">—</dd></div>
+          <div><dt>Placeables</dt><dd id="stat-placeables">—</dd></div>
+        </dl>
+        <div id="messages"></div>
+        <div class="actions">
+          <button type="button" class="primary" id="download" disabled>Download JSON</button>
+        </div>
+        <pre class="preview" id="preview" hidden></pre>
+      </div>
+    </section>
+
+    <section class="explain">
+      <h2>What each file keeps</h2>
+      <div class="columns">
+        <article>
+          <h3>Solido image</h3>
+          <p>The blueprint a Solido Replicator stores, in the shape used by a live-base export: pieces and placeables relative to the claim console, plus the base name, map, and origin.</p>
+          <ul>
+            <li>Building pieces, with yaw</li>
+            <li>Placeables, with pitch, yaw, and roll</li>
+            <li>Where the console stood</li>
+          </ul>
+        </article>
+        <article>
+          <h3>Base backup</h3>
+          <p>The <code>dune-base-backup</code> file a Base Reconstruction Tool import expects. It carries the whole placed base, not a hologram.</p>
+          <ul>
+            <li>The same pieces and placeables, in world coordinates</li>
+            <li>A claim console, building actor, and empty containers</li>
+            <li>Items, permissions, fuel, water, and staking tiles when they were already in the backup</li>
+          </ul>
+        </article>
+      </div>
+      <p class="fine">A solido never contained the chests. Converting one into a backup rebuilds the rooms and machines empty, unless you check Fill water cisterns. That writes each cistern to its in-game capacity. Converting a backup into a solido leaves stored water and items behind on purpose, so the file can be imported as a blueprint. Pentashield facing is kept. Shield size and staking tiles are not part of a live solido image.</p>
+    </section>
+  </main>
+
+  <footer>
+    <p>Runs in this browser. The sample base in the repository is Dame Sabine Dyvetz’s Home Base, exported both ways.</p>
+  </footer>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

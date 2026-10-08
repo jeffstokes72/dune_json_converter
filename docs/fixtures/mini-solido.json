@@ -1,0 +1,59 @@
+{
+  "name": "Demo Outpost",
+  "base_type": "Advanced Sub-Fief",
+  "owner_name": "Demo Sleeper",
+  "map": "HaggaBasin",
+  "x": 1000,
+  "y": 2000,
+  "z": 300,
+  "instances": [
+    {
+      "instance_id": 1,
+      "building_type": "Harkonnen_Outpost_Foundation",
+      "x": 0,
+      "y": 0,
+      "z": 0,
+      "rotation": 0
+    },
+    {
+      "instance_id": 2,
+      "building_type": "Harkonnen_Outpost_Wall_01",
+      "x": 256,
+      "y": 0,
+      "z": 384,
+      "rotation": 90
+    }
+  ],
+  "placeables": [
+    {
+      "placeable_id": "10",
+      "building_type": "StorageContainer_Placeable",
+      "x": 120,
+      "y": -40,
+      "z": 0,
+      "rx": 0,
+      "ry": -90,
+      "rz": 0
+    },
+    {
+      "placeable_id": "11",
+      "building_type": "Choam_PentashieldSurfaceVertical_Placeable",
+      "x": 400,
+      "y": 80,
+      "z": 192,
+      "rx": 0,
+      "ry": 180,
+      "rz": 0
+    },
+    {
+      "placeable_id": "12",
+      "building_type": "LargeWaterCistern_Placeable",
+      "x": -200,
+      "y": 160,
+      "z": 0,
+      "rx": 0,
+      "ry": 0,
+      "rz": 0
+    }
+  ]
+}
