@@ -12,6 +12,8 @@ When converting a solido into a backup, **Fill water cisterns** writes each cist
 
 Windtraps, deathstills, and blood purifiers are left unchanged.
 
+A Red-Blink Dune Docker host compares the file with its own game patch. Open any base backup exported from that host in this page first. Later solido conversions are stamped with that patch, so the import does not stop for a version mismatch. Without that stamp, the console says the game version does not match and waits for Import Anyway.
+
 ## Use the page
 
 GitHub Pages publishes the `docs/` folder. Until that is enabled, open it locally:

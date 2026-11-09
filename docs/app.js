@@ -14,9 +14,29 @@ const download = document.querySelector("#download");
 const preview = document.querySelector("#preview");
 const trySample = document.querySelector("#try-sample");
 
+const SERVER_GAME_KEY = "dune-converter-server-game";
+
 let sourceText = "";
 let sourceLabel = "";
 let result = null;
+
+function rememberedServerGame() {
+  try {
+    const stored = JSON.parse(sessionStorage.getItem(SERVER_GAME_KEY) || "null");
+    return stored?.patchesChecksum ? stored : null;
+  } catch {
+    return null;
+  }
+}
+
+function rememberServerGame(doc) {
+  if (detectFormat(doc) !== "base-backup" || !doc.game?.patchesChecksum) return;
+  try {
+    sessionStorage.setItem(SERVER_GAME_KEY, JSON.stringify(doc.game));
+  } catch {
+    // The conversion still works when the browser refuses storage.
+  }
+}
 
 fileInput.addEventListener("change", () => {
   const file = fileInput.files?.[0];
@@ -97,9 +117,15 @@ function convertText(text) {
   }
   const detected = detectFormat(parsed);
   solidoOptions.hidden = detected !== "solido";
+  rememberServerGame(parsed);
   try {
     const claim = claimSelect.value === "auto" ? undefined : claimSelect.value;
-    result = convertDocument(parsed, { claim, fillWater: detected === "solido" && fillWater.checked });
+    result = convertDocument(parsed, {
+      claim,
+      fillWater: detected === "solido" && fillWater.checked,
+      filename: sourceLabel,
+      game: detected === "solido" ? rememberedServerGame() : undefined
+    });
   } catch (error) {
     fail(error.message || "This file could not be converted.");
     return;

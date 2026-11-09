@@ -1,7 +1,6 @@
 import {
   BUILDING_ACTOR_CLASS,
   CLASS_BY_TYPE,
-  GAME_PROFILE,
   INVENTORIES,
   PIECE_HEALTH,
   PLACEABLE_HEALTH,
@@ -252,7 +251,7 @@ export function solidoToBackup(doc, options = {}) {
   const totemType = advanced ? "Totem_Placeable" : "Totem_Small_Placeable";
   const totemClass = CLASS_BY_TYPE[totemType];
   const totemHealth = PLACEABLE_HEALTH[totemType];
-  const nameInfo = backupName(solidoName(doc), warnings);
+  const nameInfo = backupName(solidoName(doc, options.filename), warnings);
   const map = String(doc.map || "HaggaBasin");
   const anchor = {
     x: finiteOr(doc.x, 0),
@@ -419,8 +418,21 @@ export function solidoToBackup(doc, options = {}) {
     ? Number(doc.base_id)
     : null;
 
+  const serverGame = serverGameProfile(options.game);
+  if (serverGame) {
+    warnings.unshift("Stamped with the game version from a base backup exported on your server.");
+  } else {
+    warnings.unshift("Dune Docker stops this import and says the game version does not match. On that screen choose Import Anyway. To skip the warning next time, open any base backup exported from that same host before you convert.");
+  }
+
   const document = {
-    game: GAME_PROFILE,
+    game: serverGame || {
+      build: null,
+      steamBuildId: null,
+      latestPatches: [],
+      patchesChecksum: "",
+      appliedPatchesCount: 0
+    },
     format: "dune-base-backup",
     source: {
       map,
@@ -451,8 +463,7 @@ export function solidoToBackup(doc, options = {}) {
     `Built a base backup with ${instances.length} building piece${instances.length === 1 ? "" : "s"}, ${kept.length} placeable${kept.length === 1 ? "" : "s"}, and ${advanced ? "an Advanced Sub-Fief" : "a Sub-Fief"} console.`,
     "Chests and crafting stations are empty. A solido image does not record what was stored.",
     waterNote(kept, fillWater),
-    "Staking tiles are not part of a solido image. Extend the claim after you place the backup if the base needs more land.",
-    "The file is stamped with the game patch from the sample Home Base export. A server on another patch can still import it after you confirm the version warning."
+    "Staking tiles are not part of a solido image. Extend the claim after you place the backup if the base needs more land."
   ].filter(Boolean);
 
   return {
@@ -633,9 +644,21 @@ function resolveClaim(doc, override, warnings) {
   return "advanced";
 }
 
-function solidoName(doc) {
-  const raw = doc.name || doc.Name || doc.blueprint_name || "Imported Base";
+function solidoName(doc, filename) {
+  const fromFile = String(filename || "").replace(/\.json$/i, "").replace(/[_.\\-]+/g, " ").trim();
+  const raw = doc.name || doc.Name || doc.blueprint_name || fromFile || "Imported Base";
   return String(raw).replace(/[_.\\]/g, " ").trim().replace(/\s+/g, " ") || "Imported Base";
+}
+
+function serverGameProfile(game) {
+  if (!game || typeof game !== "object" || !game.patchesChecksum) return null;
+  return {
+    build: game.build == null ? null : String(game.build),
+    steamBuildId: game.steamBuildId == null ? null : String(game.steamBuildId),
+    latestPatches: Array.isArray(game.latestPatches) ? game.latestPatches.map((patch) => String(patch)) : [],
+    patchesChecksum: String(game.patchesChecksum),
+    appliedPatchesCount: Number(game.appliedPatchesCount) || 0
+  };
 }
 
 function backupName(fullName, warnings) {

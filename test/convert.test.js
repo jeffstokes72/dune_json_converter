@@ -147,6 +147,35 @@ test("rejects files that are neither format", () => {
   assert.throws(() => convertDocument({ hello: "world" }), /neither a solido image nor a dune-base-backup/);
 });
 
+test("a solido market file keeps placeable yaw and can carry the host game version", () => {
+  const market = {
+    name: "",
+    instances: [
+      { building_type: "Atreides_Outpost_Floor", x: 2023.67, y: -2516.98, z: 133.56, rotation: 80 }
+    ],
+    placeables: [
+      { building_type: "MediumStorageContainer_Placeable", x: 10, y: 20, z: 30, rx: 0, ry: 0, rz: 170 }
+    ],
+    pentashields: []
+  };
+  const plain = convertDocument(market, { filename: "Fortress_Design_3x3.json" });
+  assert.equal(plain.document.source.name, "Fortress Design 3x3");
+  assert.equal(plain.document.game.patchesChecksum, "");
+  assert.match(plain.report.warnings.join(" "), /Import Anyway/);
+  assert.deepEqual(validateBackupStructure(plain.document), []);
+  const storage = plain.document.entries.find((entry) => entry.kind === "act" && entry.data.class?.includes("MediumStorageContainer"));
+  const yaw = quaternionYawDegrees(storage.data.transform.rotation.z, storage.data.transform.rotation.w);
+  assert.ok(angleDelta(yaw, 170) < 1e-6);
+
+  const stamped = convertDocument(market, {
+    filename: "Fortress_Design_3x3.json",
+    game: { build: "2200000", patchesChecksum: "abc123", appliedPatchesCount: 940, latestPatches: ["DA-1"] }
+  });
+  assert.equal(stamped.document.game.patchesChecksum, "abc123");
+  assert.equal(stamped.document.game.build, "2200000");
+  assert.doesNotMatch(stamped.report.warnings.join(" "), /Import Anyway/);
+});
+
 test("fill water cisterns writes each cistern to its capacity", () => {
   const solido = {
     name: "Water Test",
